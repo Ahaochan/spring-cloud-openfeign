@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
+// 引入FeignClientsRegistrar, 扫描所有被@FeignClient修饰的接口
 @Import(FeignClientsRegistrar.class)
 public @interface EnableFeignClients {
 

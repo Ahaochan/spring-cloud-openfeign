@@ -147,7 +147,9 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+		// 从@EnableFeignClients注解的defaultConfiguration属性获取默认配置类, 加载为Bean
 		registerDefaultConfiguration(metadata, registry);
+		// 扫描被@FeignClient修饰的接口, 生成动态代理
 		registerFeignClients(metadata, registry);
 	}
 
@@ -162,6 +164,7 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 			else {
 				name = "default." + metadata.getClassName();
 			}
+			// 从@EnableFeignClients注解的defaultConfiguration属性获取默认配置类, 加载为Bean
 			registerClientConfiguration(registry, name, defaultAttrs.get("defaultConfiguration"));
 		}
 	}
