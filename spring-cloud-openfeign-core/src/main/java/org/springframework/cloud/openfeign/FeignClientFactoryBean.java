@@ -393,6 +393,7 @@ public class FeignClientFactoryBean
 
 	@Override
 	public Object getObject() {
+		// 创建基于Feign的API的动态代理类
 		return getTarget();
 	}
 

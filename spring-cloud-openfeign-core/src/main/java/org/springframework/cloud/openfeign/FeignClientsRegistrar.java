@@ -218,11 +218,16 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 
 	private void registerFeignClient(BeanDefinitionRegistry registry, AnnotationMetadata annotationMetadata,
 			Map<String, Object> attributes) {
+		// @FeignClient注解修饰的接口全限定名
 		String className = annotationMetadata.getClassName();
+		// 根据接口名称获取Class对象
 		Class clazz = ClassUtils.resolveClassName(className, null);
+		// 必然不为null
 		ConfigurableBeanFactory beanFactory = registry instanceof ConfigurableBeanFactory
 				? (ConfigurableBeanFactory) registry : null;
+		// contextId > serviceId > name > value
 		String contextId = getContextId(beanFactory, attributes);
+		// 获取FeignClient的服务名, serviceId > name > value
 		String name = getName(attributes);
 		FeignClientFactoryBean factoryBean = new FeignClientFactoryBean();
 		factoryBean.setBeanFactory(beanFactory);
@@ -230,6 +235,7 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 		factoryBean.setContextId(contextId);
 		factoryBean.setType(clazz);
 		factoryBean.setRefreshableClient(isClientRefreshEnabled());
+		// 使用构造器
 		BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> {
 			factoryBean.setUrl(getUrl(beanFactory, attributes));
 			factoryBean.setPath(getPath(beanFactory, attributes));
@@ -261,10 +267,13 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 
 		String[] qualifiers = getQualifiers(attributes);
 		if (ObjectUtils.isEmpty(qualifiers)) {
+			// 访问这个Bean的别名
 			qualifiers = new String[] { contextId + "FeignClient" };
 		}
 
+		// 类名作为Bean名称, qualifiers作为别名
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, qualifiers);
+		// 根据@FeignClient属性和接口信息, 注册一个Bean
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 
 		registerOptionsBeanDefinition(registry, contextId);
@@ -283,6 +292,7 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 	}
 
 	String getName(ConfigurableBeanFactory beanFactory, Map<String, Object> attributes) {
+		// 获取FeignClient的服务名, serviceId > name > value
 		String name = (String) attributes.get("serviceId");
 		if (!StringUtils.hasText(name)) {
 			name = (String) attributes.get("name");
@@ -290,16 +300,19 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 		if (!StringUtils.hasText(name)) {
 			name = (String) attributes.get("value");
 		}
+		// 解析spel表达式
 		name = resolve(beanFactory, name);
 		return getName(name);
 	}
 
 	private String getContextId(ConfigurableBeanFactory beanFactory, Map<String, Object> attributes) {
+		// contextId > serviceId > name > value
 		String contextId = (String) attributes.get("contextId");
 		if (!StringUtils.hasText(contextId)) {
 			return getName(attributes);
 		}
 
+		// 解析spel表达式
 		contextId = resolve(beanFactory, contextId);
 		return getName(contextId);
 	}
