@@ -148,25 +148,35 @@ public class FeignClientFactoryBean
 	}
 
 	protected void configureFeign(FeignContext context, Feign.Builder builder) {
+		// 1. 获取全局配置
 		FeignClientProperties properties = beanFactory != null ? beanFactory.getBean(FeignClientProperties.class)
 				: applicationContext.getBean(FeignClientProperties.class);
 
+		// 2. 从独立配置中获取附加配置FeignClientConfigurer
 		FeignClientConfigurer feignClientConfigurer = getOptional(context, FeignClientConfigurer.class);
 		setInheritParentContext(feignClientConfigurer.inheritParentConfiguration());
 
 		if (properties != null && inheritParentContext) {
+			// 3. 默认是true
 			if (properties.isDefaultToProperties()) {
+				// @FeignClient指定的独立配置
 				configureUsingConfiguration(context, builder);
+				// 全局配置指定的默认配置default
 				configureUsingProperties(properties.getConfig().get(properties.getDefaultConfig()), builder);
+				// 全局配置指定的独立配置contextId
 				configureUsingProperties(properties.getConfig().get(contextId), builder);
 			}
 			else {
+				// 全局配置指定的默认配置default
 				configureUsingProperties(properties.getConfig().get(properties.getDefaultConfig()), builder);
+				// 全局配置指定的独立配置contextId
 				configureUsingProperties(properties.getConfig().get(contextId), builder);
+				// @FeignClient指定的独立配置
 				configureUsingConfiguration(context, builder);
 			}
 		}
 		else {
+			// @FeignClient指定的独立配置
 			configureUsingConfiguration(context, builder);
 		}
 	}
@@ -403,10 +413,13 @@ public class FeignClientFactoryBean
 	 * information
 	 */
 	<T> T getTarget() {
+		// 1. 获取Feign上下文, 里面收集了默认配置FeignClientsConfiguration, 以及由@FeignClient指定的独立配置属性Configuration
 		FeignContext context = beanFactory != null ? beanFactory.getBean(FeignContext.class)
 				: applicationContext.getBean(FeignContext.class);
+		// 2. 创建Builder构造器, 并进行配置
 		Feign.Builder builder = feign(context);
 
+		// 3. 如果没有配置url, 就可能是服务间调用, 走负载均衡
 		if (!StringUtils.hasText(url)) {
 
 			if (LOG.isInfoEnabled()) {
@@ -421,6 +434,8 @@ public class FeignClientFactoryBean
 			url += cleanPath();
 			return (T) loadBalance(builder, context, new HardCodedTarget<>(type, name, url));
 		}
+
+		// 4. 如果配置了url, 就直接访问, 不用负载均衡
 		if (StringUtils.hasText(url) && !url.startsWith("http")) {
 			url = "http://" + url;
 		}

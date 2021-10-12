@@ -225,7 +225,7 @@ class FeignClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLo
 		// 必然不为null
 		ConfigurableBeanFactory beanFactory = registry instanceof ConfigurableBeanFactory
 				? (ConfigurableBeanFactory) registry : null;
-		// contextId > serviceId > name > value
+		// 上下文ID, 用于区分并获取独立的配置, contextId > serviceId > name > value
 		String contextId = getContextId(beanFactory, attributes);
 		// 获取FeignClient的服务名, serviceId > name > value
 		String name = getName(attributes);
