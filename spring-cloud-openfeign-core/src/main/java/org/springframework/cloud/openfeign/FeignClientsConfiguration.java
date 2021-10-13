@@ -207,6 +207,7 @@ public class FeignClientsConfiguration {
 		@Scope("prototype")
 		@ConditionalOnMissingBean
 		public Feign.Builder feignBuilder(Retryer retryer) {
+			// 默认不重试
 			return Feign.builder().retryer(retryer);
 		}
 
@@ -221,6 +222,7 @@ public class FeignClientsConfiguration {
 		@Scope("prototype")
 		@ConditionalOnMissingBean({ Feign.Builder.class, CircuitBreakerFactory.class })
 		public Feign.Builder defaultFeignBuilder(Retryer retryer) {
+			// 默认不重试
 			return Feign.builder().retryer(retryer);
 		}
 

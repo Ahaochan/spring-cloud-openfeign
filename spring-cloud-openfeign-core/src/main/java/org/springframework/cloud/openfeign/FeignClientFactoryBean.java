@@ -118,9 +118,11 @@ public class FeignClientFactoryBean
 	}
 
 	protected Feign.Builder feign(FeignContext context) {
+		// FeignClientsConfiguration中初始化的DefaultFeignLoggerFactory
 		FeignLoggerFactory loggerFactory = get(context, FeignLoggerFactory.class);
 		Logger logger = loggerFactory.create(type);
 
+		// FeignClientsConfiguration中初始化的Feign.Builder、Encoder、Decoder、SpringMvcContract
 		// @formatter:off
 		Feign.Builder builder = get(context, Feign.Builder.class)
 				// required values
@@ -130,6 +132,7 @@ public class FeignClientFactoryBean
 				.contract(get(context, Contract.class));
 		// @formatter:on
 
+		// 进行配置builder
 		configureFeign(context, builder);
 		applyBuildCustomizers(context, builder);
 
@@ -159,24 +162,24 @@ public class FeignClientFactoryBean
 		if (properties != null && inheritParentContext) {
 			// 3. 默认是true
 			if (properties.isDefaultToProperties()) {
-				// @FeignClient指定的独立配置
+				// 从服务独立的Spring上下文获取组件Bean进行配置
 				configureUsingConfiguration(context, builder);
-				// 全局配置指定的默认配置default
+				// 配置文件指定的默认配置default, feign.client.default.xxxxxx
 				configureUsingProperties(properties.getConfig().get(properties.getDefaultConfig()), builder);
-				// 全局配置指定的独立配置contextId
+				// 配置文件指定的独立配置contextId, feign.client.contextId.xxxxxx
 				configureUsingProperties(properties.getConfig().get(contextId), builder);
 			}
 			else {
-				// 全局配置指定的默认配置default
+				// 配置文件指定的默认配置default, feign.client.default.xxxxxx
 				configureUsingProperties(properties.getConfig().get(properties.getDefaultConfig()), builder);
-				// 全局配置指定的独立配置contextId
+				// 配置文件指定的独立配置contextId, feign.client.contextId.xxxxxx
 				configureUsingProperties(properties.getConfig().get(contextId), builder);
-				// @FeignClient指定的独立配置
+				// 从服务独立的Spring上下文获取组件Bean进行配置
 				configureUsingConfiguration(context, builder);
 			}
 		}
 		else {
-			// @FeignClient指定的独立配置
+			// 从服务独立的Spring上下文获取组件Bean进行配置
 			configureUsingConfiguration(context, builder);
 		}
 	}
@@ -186,6 +189,7 @@ public class FeignClientFactoryBean
 		if (level != null) {
 			builder.logLevel(level);
 		}
+		// 默认不重试
 		Retryer retryer = getInheritedAwareOptional(context, Retryer.class);
 		if (retryer != null) {
 			builder.retryer(retryer);
@@ -201,6 +205,7 @@ public class FeignClientFactoryBean
 				builder.errorDecoder(factoryErrorDecoder);
 			}
 		}
+		// 请求相关参数
 		Request.Options options = getInheritedAwareOptional(context, Request.Options.class);
 		if (options == null) {
 			options = getOptionsByName(context, contextId);
@@ -208,7 +213,9 @@ public class FeignClientFactoryBean
 
 		if (options != null) {
 			builder.options(options);
+			// 默认60000毫秒, 60秒
 			readTimeoutMillis = options.readTimeoutMillis();
+			// 默认10000毫秒, 10秒
 			connectTimeoutMillis = options.connectTimeoutMillis();
 			followRedirects = options.isFollowRedirects();
 		}
@@ -413,7 +420,7 @@ public class FeignClientFactoryBean
 	 * information
 	 */
 	<T> T getTarget() {
-		// 1. 获取Feign上下文, 里面收集了默认配置FeignClientsConfiguration, 以及由@FeignClient指定的独立配置属性Configuration
+		// 1. 获取FeignAutoConfiguration初始化的Feign上下文, 里面收集了默认配置FeignClientsConfiguration, 以及由@FeignClient指定的独立配置属性Configuration
 		FeignContext context = beanFactory != null ? beanFactory.getBean(FeignContext.class)
 				: applicationContext.getBean(FeignContext.class);
 		// 2. 创建Builder构造器, 并进行配置
@@ -440,6 +447,7 @@ public class FeignClientFactoryBean
 			url = "http://" + url;
 		}
 		String url = this.url + cleanPath();
+		// 获取
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			if (client instanceof FeignBlockingLoadBalancerClient) {

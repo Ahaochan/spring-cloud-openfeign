@@ -90,6 +90,7 @@ public class FeignAutoConfiguration {
 
 	private static final Log LOG = LogFactory.getLog(FeignAutoConfiguration.class);
 
+	// 收集所有@FeignClients和@FeignClient中的配置
 	@Autowired(required = false)
 	private List<FeignClientSpecification> configurations = new ArrayList<>();
 
@@ -100,6 +101,7 @@ public class FeignAutoConfiguration {
 
 	@Bean
 	public FeignContext feignContext() {
+		// 每个服务有独立的Spring上下文, 独立的Encoder、Decoder等组件
 		FeignContext context = new FeignContext();
 		context.setConfigurations(this.configurations);
 		return context;
