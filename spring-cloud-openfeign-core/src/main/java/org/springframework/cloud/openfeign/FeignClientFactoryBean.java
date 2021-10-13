@@ -383,6 +383,7 @@ public class FeignClientFactoryBean
 	}
 
 	protected <T> T loadBalance(Feign.Builder builder, FeignContext context, HardCodedTarget<T> target) {
+		// 从DefaultFeignLoadBalancerConfiguration初始化的FeignBlockingLoadBalancerClient
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			builder.client(client);
@@ -439,6 +440,7 @@ public class FeignClientFactoryBean
 				url = name;
 			}
 			url += cleanPath();
+			// 构造HardCodedTarget, 传入接口类型, 服务名, url地址
 			return (T) loadBalance(builder, context, new HardCodedTarget<>(type, name, url));
 		}
 
@@ -447,7 +449,6 @@ public class FeignClientFactoryBean
 			url = "http://" + url;
 		}
 		String url = this.url + cleanPath();
-		// 获取
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			if (client instanceof FeignBlockingLoadBalancerClient) {
