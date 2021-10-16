@@ -170,11 +170,13 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 
 	@Override
 	protected void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
+		// clz有可能是@FeignClient修饰的接口的Class对象, 也有可能是这个接口唯一一个父接口的Class对象
 		if (clz.getInterfaces().length == 0) {
 			RequestMapping classAnnotation = findMergedAnnotation(clz, RequestMapping.class);
 			if (classAnnotation != null) {
 				// Prepend path from class annotation if specified
 				if (classAnnotation.value().length > 0) {
+					// 获取RequestMapping的url参数, 注入到RequestTemplate里
 					String pathValue = emptyToNull(classAnnotation.value()[0]);
 					pathValue = resolve(pathValue);
 					if (!pathValue.startsWith("/")) {
@@ -191,9 +193,13 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 
 	@Override
 	public MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
+		// 1. 父类BaseContract会传参进来, 过滤掉Object类里的方法, 过滤掉static修饰的方法, 过滤掉接口的默认方法
+		//    这里的targetType就是@FeignClient修饰的接口的Class对象, Method就是这个接口里的方法对象
 		processedMethods.put(Feign.configKey(targetType, method), method);
+		// 2. 处理类上、方法上、参数上的@RequestMapping、@RequestParam相关注解
 		MethodMetadata md = super.parseAndValidateMetadata(targetType, method);
 
+		// 3. 对@RequestMapping做一些额外处理
 		RequestMapping classAnnotation = findMergedAnnotation(targetType, RequestMapping.class);
 		if (classAnnotation != null) {
 			// produces - use from class annotation only if method has not specified this
@@ -220,6 +226,7 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 			data.template().collectionFormat(collectionFormat.value());
 		}
 
+		// 如果这个注解不是@RequestMapping, 或者这个注解没有被@RequestMapping修饰, 就跳出去
 		if (!RequestMapping.class.isInstance(methodAnnotation)
 				&& !methodAnnotation.annotationType().isAnnotationPresent(RequestMapping.class)) {
 			return;
@@ -283,12 +290,16 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 
 	@Override
 	protected boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
+		// 第paramIndex参数上的注解数组annotations
 		boolean isHttpAnnotation = false;
 
 		AnnotatedParameterProcessor.AnnotatedParameterContext context = new SimpleAnnotatedParameterContext(data,
 				paramIndex);
+		// 之前parseAndValidateMetadata初始化好的Map, 获取当前方法Method
 		Method method = processedMethods.get(data.configKey());
+		// 遍历这个参数的每一个注解
 		for (Annotation parameterAnnotation : annotations) {
+			// 获取不同注解类型的处理器, 包括@RequestParam等注解
 			AnnotatedParameterProcessor processor = annotatedArgumentProcessors
 					.get(parameterAnnotation.annotationType());
 			if (processor != null) {
@@ -297,10 +308,13 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 				// missing String #value():
 				processParameterAnnotation = synthesizeWithMethodParameterNameAsFallbackValue(parameterAnnotation,
 						method, paramIndex);
+				// 如果能处理, 就说明是http相关注解
 				isHttpAnnotation |= processor.processArgument(context, processParameterAnnotation, method);
 			}
 		}
 
+		// 如果请求头Content-Type不是multipart/form-data, 并且是被http相关注解处理过了
+		// 处理Expander
 		if (!isMultipartFormData(data) && isHttpAnnotation && data.indexToExpander().get(paramIndex) == null) {
 			TypeDescriptor typeDescriptor = createTypeDescriptor(method, paramIndex);
 			if (conversionService.canConvert(typeDescriptor, STRING_TYPE_DESCRIPTOR)) {
@@ -393,6 +407,7 @@ public class SpringMvcContract extends Contract.BaseContract implements Resource
 		if (contentTypes != null && !contentTypes.isEmpty()) {
 			String type = contentTypes.iterator().next();
 			try {
+				// 判断请求头Content-Type是不是multipart/form-data
 				return Objects.equals(MediaType.valueOf(type), MediaType.MULTIPART_FORM_DATA);
 			}
 			catch (InvalidMediaTypeException ignored) {

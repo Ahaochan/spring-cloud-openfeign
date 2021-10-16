@@ -47,6 +47,7 @@ public class RequestParamParameterProcessor implements AnnotatedParameterProcess
 
 	@Override
 	public boolean processArgument(AnnotatedParameterContext context, Annotation annotation, Method method) {
+		// 获取这个参数的下标, 以及类Class对象, 以及MethodMetadata
 		int parameterIndex = context.getParameterIndex();
 		Class<?> parameterType = method.getParameterTypes()[parameterIndex];
 		MethodMetadata data = context.getMethodMetadata();

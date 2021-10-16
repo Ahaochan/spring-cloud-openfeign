@@ -387,7 +387,9 @@ public class FeignClientFactoryBean
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			builder.client(client);
+			// 从FeignAutoConfiguration初始化的HystrixTargeter或者FeignCircuitBreakerTargeter
 			Targeter targeter = get(context, Targeter.class);
+			// 最终走的是Feign.Builder.target(target);
 			return targeter.target(this, builder, context, target);
 		}
 
