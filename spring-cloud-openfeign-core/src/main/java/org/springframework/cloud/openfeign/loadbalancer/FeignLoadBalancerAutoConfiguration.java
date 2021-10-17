@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnClass(Feign.class)
 @ConditionalOnBean({ LoadBalancerClient.class, LoadBalancerClientFactory.class })
 @AutoConfigureBefore(FeignAutoConfiguration.class)
+// 8a08e1ec4b4f0d40193a4ea9c03afdeffe3110a6, 移除ribbon和hystrix, FeignRibbonClientAutoConfiguration
 @AutoConfigureAfter({ BlockingLoadBalancerClientAutoConfiguration.class, LoadBalancerAutoConfiguration.class })
 @EnableConfigurationProperties(FeignHttpClientProperties.class)
 @Configuration(proxyBeanMethods = false)

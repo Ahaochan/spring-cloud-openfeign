@@ -74,6 +74,7 @@ public class FeignBlockingLoadBalancerClient implements Client {
 
 	@Override
 	public Response execute(Request request, Request.Options options) throws IOException {
+		// 从请求url获取服务名称
 		final URI originalUri = URI.create(request.url());
 		String serviceId = originalUri.getHost();
 		Assert.state(serviceId != null, "Request URI does not contain a valid hostname: " + originalUri);
