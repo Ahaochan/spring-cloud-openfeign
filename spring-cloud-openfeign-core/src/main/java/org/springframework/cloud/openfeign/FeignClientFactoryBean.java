@@ -383,7 +383,7 @@ public class FeignClientFactoryBean
 	}
 
 	protected <T> T loadBalance(Feign.Builder builder, FeignContext context, HardCodedTarget<T> target) {
-		// 从DefaultFeignLoadBalancerConfiguration初始化的FeignBlockingLoadBalancerClient
+		// 从DefaultFeignLoadBalancedConfiguration初始化的LoadBalancerFeignClient
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			builder.client(client);

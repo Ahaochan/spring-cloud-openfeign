@@ -33,11 +33,12 @@ import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
  * @author Dave Syer
  *
  */
+// 从DefaultFeignLoadBalancerConfiguration初始化的LoadBalancerFeignClient
 public class LoadBalancerFeignClient implements Client {
 
 	static final Request.Options DEFAULT_OPTIONS = new Request.Options();
 
-	// 从DefaultFeignLoadBalancerConfiguration初始化的FeignBlockingLoadBalancerClient
+	// 默认是Client.Default
 	private final Client delegate;
 
 	private CachingSpringLoadBalancerFactory lbClientFactory;
@@ -85,6 +86,7 @@ public class LoadBalancerFeignClient implements Client {
 			IClientConfig requestConfig = getClientConfig(options, clientName);
 			// FeignLoadBalancer的父类是ribbon里的AbstractLoadBalancerAwareClient
 			// FeignLoadBalancer里面封装了ZoneAwareLoadBalancer
+			// executeWithLoadBalancer会去调用FeignLoadBalancer的execute()方法
 			return lbClient(clientName)
 					.executeWithLoadBalancer(ribbonRequest, requestConfig).toResponse();
 		}

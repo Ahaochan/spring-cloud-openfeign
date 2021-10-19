@@ -88,8 +88,11 @@ public class FeignLoadBalancer extends
 					override.readTimeout(this.readTimeout));
 		}
 		else {
+			// connectTimeout默认60000毫秒, 60秒
+			// readTimeout默认10000毫秒, 10秒
 			options = new Request.Options(this.connectTimeout, this.readTimeout);
 		}
+		// 默认是Client.Default
 		Response response = request.client().execute(request.toRequest(), options);
 		return new RibbonResponse(request.getUri(), response);
 	}
