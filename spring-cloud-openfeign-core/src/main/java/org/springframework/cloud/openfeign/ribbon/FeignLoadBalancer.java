@@ -100,7 +100,10 @@ public class FeignLoadBalancer extends
 	@Override
 	public RequestSpecificRetryHandler getRequestSpecificRetryHandler(
 			RibbonRequest request, IClientConfig requestConfig) {
+		// 从配置中创建ribbon的重试器RequestSpecificRetryHandler
+		// 获取配置文件的OkToRetryOnAllOperations属性, 默认值是false, 属性定义在ribbon的CommonClientConfigKey中
 		if (this.ribbon.isOkToRetryOnAllOperations()) {
+			// RetryHandler读取MaxAutoRetries和MaxAutoRetriesNextServer配置
 			return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(),
 					requestConfig);
 		}
