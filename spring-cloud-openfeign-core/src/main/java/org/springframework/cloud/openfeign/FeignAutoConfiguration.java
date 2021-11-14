@@ -107,6 +107,16 @@ public class FeignAutoConfiguration {
 		return context;
 	}
 
+	// @Configuration(proxyBeanMethods = false)
+	// @ConditionalOnClass(name = "feign.hystrix.HystrixFeign")
+	// protected static class HystrixFeignTargeterConfiguration {
+	// 	@Bean
+	// 	@ConditionalOnMissingBean
+	// 	public Targeter feignTargeter() {
+	// 		return new HystrixTargeter();
+	// 	}
+	// }
+
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ Module.class, Page.class, Sort.class })
 	@ConditionalOnProperty(value = "feign.autoconfiguration.jackson.enabled", havingValue = "true")

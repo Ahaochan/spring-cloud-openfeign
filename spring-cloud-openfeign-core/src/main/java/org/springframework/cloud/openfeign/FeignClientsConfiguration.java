@@ -251,4 +251,16 @@ public class FeignClientsConfiguration {
 
 	}
 
+	// @Configuration(proxyBeanMethods = false)
+	// @ConditionalOnClass({ HystrixCommand.class, HystrixFeign.class })
+	// protected static class HystrixFeignConfiguration {
+	// 	@Bean
+	// 	@Scope("prototype")
+	// 	@ConditionalOnMissingBean
+	// 	@ConditionalOnProperty(name = "feign.hystrix.enabled")
+	// 	public Feign.Builder feignHystrixBuilder() {
+	// 		// 供HystrixTargeter使用
+	// 		return HystrixFeign.builder();
+	// 	}
+	// }
 }

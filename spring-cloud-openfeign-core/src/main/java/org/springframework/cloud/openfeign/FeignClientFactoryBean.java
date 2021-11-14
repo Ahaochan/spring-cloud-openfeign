@@ -465,6 +465,7 @@ public class FeignClientFactoryBean
 			}
 			builder.client(client);
 		}
+		// 这里可以注入FeignAutoConfiguration初始化的HystrixTargeter
 		Targeter targeter = get(context, Targeter.class);
 		return (T) targeter.target(this, builder, context, new HardCodedTarget<>(type, name, url));
 	}
